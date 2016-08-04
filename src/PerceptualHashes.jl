@@ -1,4 +1,4 @@
-module PerceptualHash
+module PerceptualHashes
 
 using Images, Colors
 
