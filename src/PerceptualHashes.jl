@@ -2,6 +2,8 @@ module PerceptualHashes
 
 using Images, Colors
 
+import Base.convert
+
 function greyscale(x)
   avg = mean([x.b, x.g, x.r])
   return RGB(avg, avg, avg)
@@ -11,6 +13,26 @@ end
 function imapply(func, image)
   return Image(map(func, data(image)), colorspace=image.properties["colorspace"], spatialorder=image.properties["spatialorder"])
 end
+
+
+"""
+ convert(::Type{Int32}, hash::BitArray{1})
+
+Converts a bitarray into an Int. I feel like I shouldn't have to write this, 
+but `reinterpret` doesn't seem to work. 
+"""
+function convert(::Type{UInt32}, hsh::BitArray{1})
+  i = 0x00000000
+  for hbit in hsh
+    if hbit
+      i = i + 0x1
+    end
+    i = i << 1
+  end
+  return i
+end
+
+
 
 
 """
@@ -37,12 +59,14 @@ function bmv(image::Image, imgsize=256, blocksize=16)
   raw = data(prepped)
 
   blockmeans = []
+  #Move a blocksize-square window over the image, taking the mean.
   for i in 0:blocksize:(imgsize-blocksize), j in 0:blocksize:(imgsize-blocksize) 
     block = raw[i+1:i+blocksize,j+1:j+blocksize]
     blockmean = mean(map(x->x.b, block))
     push!(blockmeans, blockmean)
   end
 
+  #Identifiy the median block and code all blocks as >= or not.
   medblock = median(blockmeans)
   hash = BitArray(map(bm-> bm >= medblock, blockmeans))
   return hash
