@@ -1,10 +1,10 @@
 using PerceptualHashes
 using Base.Test
 
-arc1n = perceptual_hash("images/architecture1.bmp")
-arc1c = perceptual_hash("images/architecture1-compressed.jpg")
-arc2n = perceptual_hash("images/architecture_2.bmp")
-arc2c = perceptual_hash("images/architecture_2-compressed.jpg")
+arc1n = perceptual_hash("../images/architecture1.bmp")
+arc1c = perceptual_hash("../images/architecture1-compressed.jpg")
+arc2n = perceptual_hash("../images/architecture_2.bmp")
+arc2c = perceptual_hash("../images/architecture_2-compressed.jpg")
 
 @test UInt32(arc1n) == 0x3800ffff
 @test UInt32(arc1c) == 0x3800ffff
@@ -12,11 +12,11 @@ arc2c = perceptual_hash("images/architecture_2-compressed.jpg")
 @test hdist(arc2n, arc2c) == 0
 @test hdist(arc1n, arc2n) == 130
 
-dlist = readdir("images")
+dlist = readdir("../images")
 @test length(dlist) == 16
 
-compressed  = map(x -> "images/"*x, filter(x -> contains(x, "compressed.jpg"), dlist))
-normal      = map(x -> "images/"*x, filter(x -> contains(x, ".bmp"), dlist))
+compressed  = map(x -> "../images/"*x, filter(x -> contains(x, "compressed.jpg"), dlist))
+normal      = map(x -> "../images/"*x, filter(x -> contains(x, ".bmp"), dlist))
 
 bmv_compressed  = map(perceptual_hash, compressed)
 bmv_normal      = map(perceptual_hash, normal)
@@ -30,7 +30,7 @@ dct_cmbo        = zip(dct_compressed, dct_normal)
 dct_diff        = map(x -> hdist(x[1],x[2]), dct_cmbo)
 @test dct_diff == [2,0,0,0,0,0,0,0]
 
-resdict = resolve_images("images", 5)
+resdict = resolve_images("../images", 5)
 
 #16 mappings
 @test length(resdict) == 16
