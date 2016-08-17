@@ -11,6 +11,7 @@ Perceptual hashing is a useful tool for detecting duplicates of images which are
 This library currently implements:
 
  + The Block Mean Value hash described by [Zauner (2010)](http://phash.org/docs/pubs/thesis_zauner.pdf)
+ + The Discrete Cosine Transform hash described by the same.
 
 
 Usage is simple.
@@ -25,7 +26,7 @@ c_hash = perceptual_hash("images/doodle.bmp")
 
 # Compare images with their hash Hamming distance
 hdist(a_hash, b_hash)
-# 2 low value, some compression impact.
+# 4 low value, some compression impact.
 
 hdist(a_hash, c_hash)
 # 122 high value, totally different image.
