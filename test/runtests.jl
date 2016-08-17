@@ -1,6 +1,10 @@
 using PerceptualHashes
 using Base.Test
 
+if VERSION > v"0.4.5"
+  using Combinatorics
+end
+
 arc1n = perceptual_hash("../images/architecture1.bmp")
 arc1c = perceptual_hash("../images/architecture1-compressed.jpg")
 arc2n = perceptual_hash("../images/architecture_2.bmp")
