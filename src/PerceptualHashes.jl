@@ -4,6 +4,30 @@ using Images, Colors, FixedPointNumbers
 
 import Base.convert
 
+"""
+
+  `hist_equalise(image, levels=256)`
+
+  Equalise a greyscale `image` by applying a histogram of `levels` levels to it.
+  Equalisation 'sharpens' an image by redistributing pixel values across the
+  range of possible outputs. Returns the equalised `Image`, also greyscale.
+"""
+function hist_equalise(image::Image, levels=256)
+  edges, counts = imhist(image, levels)
+  cdf = cumsum(counts)
+  cdf_min = cdf[1]
+  denum = (width(image) * height(image)) - cdf_min
+
+  h = Dict()
+  for i in 1:length(edges)
+    h[edges[i]] = (round( ((cdf[i] - cdf_min) / denum) * (levels-2) ) + 1)/levels
+  end
+
+  imnew = map( x -> h[edges[max(findlast(y -> y <= Float64(gray(x)), edges),edges[1])]], data(greyscale(image)))
+  return Image(imnew, colorspace="Gray", spatialorder="x y") 
+end
+ 
+
 function greyscale(image::Image)
   return convert(Image{Gray{UFixed{UInt8, 8}}}, image)
 end
@@ -136,7 +160,36 @@ function dct_hash(image::Image, imgsize=32)
   hash = BitArray(map(x -> x >= med, pixvals))
   return hash
 end
-  
+
+function mh_kern(alpha, level)
+  sigma = 4 * (alpha^level)
+  size = 2*sigma+1
+  mul = 1/(alpha^level)
+  kern = Matrix(size,size)
+  for x in 1:size, y in 1:size
+    xpos = mul*(x-sigma)
+    ypos = mul*(y-sigma)
+    a = xpos^2 + ypos^2
+    kern[x,y] = (2-a)*exp(-a/2)
+  end
+  return kern
+end
+ 
+
+function mh_hash(image::Image, alpha=2, lvl=1)
+  greyed = greyscale(image)
+  blurred = imfilter_gaussian(convert(Image{RGB}, greyed), ones(ndims(greyed)))
+  resized = Images.imresize(greyscale(blurred), (512, 512))
+  equalised = hist_equalise(resized)
+
+  mhkern = mh_kern(alpha, level)
+#  imfilter_LoG(img, mhkern) <- not this, need to implement 'correlate'
+  #weird hash bullshit
+end
+
+
+
+
 
 
 """
