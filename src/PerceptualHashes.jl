@@ -2,7 +2,7 @@ module PerceptualHashes
 
 using Images, Colors, FixedPointNumbers
 
-if VERSION >= v"0.7"
+if VERSION > v"0.6"
   using FFTW
 end
 
