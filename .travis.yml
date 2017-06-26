@@ -11,4 +11,4 @@ notifications:
 script:
   - julia -e 'Pkg.clone(pwd())'
   - julia -e 'Pkg.build("PerceptualHashes")'
-  - travis_wait julia --check-bounds=yes -e 'Pkg.test("PerceptualHashes", coverage=true)'
+  - travis_wait julia test/runtests.jl 
