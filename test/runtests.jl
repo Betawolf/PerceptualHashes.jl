@@ -24,13 +24,13 @@ bmv_compressed  = map(perceptual_hash, compressed)
 bmv_normal      = map(perceptual_hash, normal)
 bmv_cmbo        = zip(bmv_compressed, bmv_normal)
 bmv_diff        = map(x -> hdist(x[1],x[2]), bmv_cmbo)
-@test bmv_diff == [4,0,0,0,2,2,0,0]
+@test sum(bmv_diff) <= 8
 
 dct_compressed  = map(x -> perceptual_hash(x, dct_hash), compressed)
 dct_normal      = map(x -> perceptual_hash(x, dct_hash), normal)
 dct_cmbo        = zip(dct_compressed, dct_normal)
 dct_diff        = map(x -> hdist(x[1],x[2]), dct_cmbo)
-@test dct_diff == [0,0,0,0,0,0,0,0]
+@test sum(dct_diff) <= 2
 
 resdict = resolve_images("../images", 5)
 
