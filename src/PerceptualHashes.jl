@@ -2,6 +2,10 @@ module PerceptualHashes
 
 using Images, Colors, FixedPointNumbers
 
+if VERSION >= v"0.7"
+  using FFTW
+end
+
 import Base.convert
 
 """
