@@ -10,9 +10,9 @@ import Base.convert
 
   Equalise a greyscale `image` by applying a histogram of `levels` levels to it.
   Equalisation 'sharpens' an image by redistributing pixel values across the
-  range of possible outputs. Returns the equalised `Image`, also greyscale.
+  range of possible outputs. Returns the equalised `ImageMeta`, also greyscale.
 """
-function hist_equalise(image::Image, levels=256)
+function hist_equalise(image::ImageMeta, levels=256)
   edges, counts = imhist(image, levels)
   cdf = cumsum(counts)
   cdf_min = cdf[1]
@@ -24,17 +24,17 @@ function hist_equalise(image::Image, levels=256)
   end
 
   imnew = map( x -> h[edges[max(findlast(y -> y <= Float64(gray(x)), edges),edges[1])]], data(greyscale(image)))
-  return Image(imnew, colorspace="Gray", spatialorder="x y") 
+  return ImageMeta(imnew, colorspace="Gray", spatialorder="x y") 
 end
  
 
-function greyscale(image::Image)
-  return convert(Image{Gray{UFixed{UInt8, 8}}}, image)
+function greyscale(image::ImageMeta)
+  return convert(ImageMeta{Gray{Normed{UInt8, 8}}}, image)
 end
 
 
 function imapply(func, image)
-  return Image(map(func, data(image)), colorspace=image.properties["colorspace"], spatialorder=image.properties["spatialorder"])
+  return ImageMeta(map(func, data(image)), colorspace=image.properties["colorspace"], spatialorder=image.properties["spatialorder"])
 end
 
 
@@ -88,7 +88,7 @@ end
   hash represented as a `BitArray`, with a default length of 256 bits 
   (32 bytes). 
 """
-function bmv_hash(image::Image, imgsize=256, blocksize=16)
+function bmv_hash(image::ImageMeta, imgsize=256, blocksize=16)
   greyed = greyscale(image)
   prepped = Images.imresize(greyed, (imgsize, imgsize))
   raw = map(x -> gray(x), data(prepped))
@@ -133,10 +133,10 @@ end
 
   You may want to use `convert(UInt64, BitArray)`.
 """
-function dct_hash(image::Image, imgsize=32)
+function dct_hash(image::ImageMeta, imgsize=32)
   greyed = greyscale(image)
 
-  mfilter = imaverage((7,7))
+  mfilter = centered(imaverage((7,7)))
   smoothed = imfilter(greyed, mfilter)
 
   prepped = Images.imresize(smoothed, (imgsize, imgsize))
@@ -176,9 +176,9 @@ function mh_kern(alpha, level)
 end
  
 
-function mh_hash(image::Image, alpha=2, lvl=1)
+function mh_hash(image::ImageMeta, alpha=2, lvl=1)
   greyed = greyscale(image)
-  blurred = imfilter_gaussian(convert(Image{RGB}, greyed), ones(ndims(greyed)))
+  blurred = imfilter_gaussian(convert(ImageMeta{RGB}, greyed), ones(ndims(greyed)))
   resized = Images.imresize(greyscale(blurred), (512, 512))
   equalised = hist_equalise(resized)
 
@@ -233,7 +233,7 @@ end
   See also: `bmv`
 """
 function perceptual_hash(filename, method=bmv_hash)
-  imfile = load(filename)
+  imfile = ImageMeta(load(filename))
   return method(imfile)
 end
 
