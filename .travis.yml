@@ -8,6 +8,11 @@ julia:
 notifications:
   email: false
 # uncomment the following lines to override the default test script
-#script:
+script:
+  julia -e 'Pkg.clone(pwd())'
+  julia -e 'Pkg.build("$name")'
+  if [ -f test/runtests.jl ]; then
+    travis_wait julia --check-bounds=yes -e 'Pkg.test("$name", coverage=true)'
+  fi
 #  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 #  - julia -e 'Pkg.clone(pwd()); Pkg.build("PerceptualHash"); Pkg.test("PerceptualHash"; coverage=true)'
